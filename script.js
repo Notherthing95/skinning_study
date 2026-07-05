@@ -274,9 +274,15 @@ onload = function()
       mat.rotate(a_bMatrix[1], angle, [1.0, 0.0, 0.0], a_lMatrix[1]);// src angle axis dest
 
       // モデルのワールド行列の生成【ここをなんとかする】
-      a_wMatrix[0] = a_lMatrix[0];
-      a_wMatrix[1] = a_wMatrix[0];
-	    
+        var world1 = mat.create();
+        mat.multiply(a_lMatrix[0], a_lMatrix[1], world1);   
+
+        var inverseBind1 = mat.create();
+        mat.inverse(a_bMatrix[1], inverseBind1);            // (minMatrix.js)
+
+        a_wMatrix[0] = a_lMatrix[0];                        
+        mat.multiply(world1, inverseBind1, a_wMatrix[1]);   // 反映
+
       // モデル描画
       gl.useProgram(prg_skin);
 
@@ -337,8 +343,8 @@ onload = function()
       gl.bindBuffer(gl.UNIFORM_BUFFER, null);
       gl.drawElements(gl.LINES, 6, gl.UNSIGNED_SHORT, 0);
       // 次の座標系
-      var m = mat.create();
-      mat.multiply(a_lMatrix[0], a_lMatrix[1], m );
+      var m = mat.create();                         // ここと
+      mat.multiply(a_lMatrix[0], a_lMatrix[1], m ); // ここは使えそう
       gl.bindBuffer(gl.UNIFORM_BUFFER, aUBO[1]);
       gl.bufferData(gl.UNIFORM_BUFFER, m, gl.DYNAMIC_DRAW);
       gl.bindBuffer(gl.UNIFORM_BUFFER, null);
